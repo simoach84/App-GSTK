@@ -1,0 +1,54 @@
+Fonctionnalité : Ajout, Modification et suppression des produits 
+Nom de l’étudiant : Youcef Saadi
+
+Objectif
+L’objectif de cette fonctionnalité est de permettre aux utilisateurs de l’application de gérer dynamiquement les produits disponibles dans le stock, à travers :
+•	l’ajout de nouveaux produits,
+•	la modification des produits existants,
+•	la suppression de produits.
+Cette partie constitue la base de l’application, car elle alimente les autres modules comme la gestion des mouvements ou la génération de rapports.
+________________________________________
+Technologies utilisées
+•	Java – Langage principal du projet.
+•	JavaFX – Interface graphique.
+•	JDBC – Connexion à la base de données MySQL.
+•	MySQL – Base de données utilisée pour stocker les produits.
+________________________________________
+Architecture de la partie
+L’architecture est basée sur le modèle MVC (Modèle - Vue - Contrôleur) :
+•	Modèle : Produit.java
+Représente un objet produit avec ses attributs : id, nom, quantite, prix.
+•	DAO : ProduitDAO.java
+Contient toutes les méthodes pour interagir avec la base de données (CRUD).
+•	Contrôleur : ProduitController.java
+Intermédiaire entre l’interface utilisateur et le DAO. Gère la logique métier et transmet les actions utilisateur.
+________________________________________
+Fonctionnalités implémentées
+Ajouter un produit
+Méthode :
+public void ajouterProduit(String nom, int quantite, double prix)
+Insère un nouveau produit dans la base en utilisant une requête INSERT INTO.
+ Modifier un produit
+Méthode :
+public void modifierProduit(int id, String nom, int quantite, double prix)
+Modifie les informations d’un produit existant dans la base avec une requête UPDATE.
+Supprimer un produit
+Méthode :
+public void supprimerProduit(int id)
+Supprime un produit de la base avec une requête DELETE.
+Lister tous les produits
+Méthode :
+java
+CopierModifier
+public List<Produit> listerProduits()
+Récupère tous les produits de la table produit pour les afficher dans l’interface.
+________________________________________
+Processus de développement
+1.	Création du modèle Produit.java avec constructeurs, getters et setters.
+2.	Mise en place du DAO (ProduitDAO.java) pour implémenter les requêtes SQL avec PreparedStatement.
+3.	Développement du contrôleur ProduitController.java pour simplifier l’accès aux fonctionnalités depuis la vue.
+4.	Test des fonctionnalités en local avec des données simulées ou depuis l’interface JavaFX.
+________________________________________
+Conclusion
+Cette première partie a permis de construire les fondations de l’application en instaurant une gestion complète des produits du stock. Grâce à une structure claire et respectant le modèle MVC, le système reste maintenable et évolutif.
+Ce module est essentiel, car il alimente les autres composantes de l’application, notamment la gestion des mouvements de stock et la génération de rapports.
