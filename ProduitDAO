@@ -1,0 +1,70 @@
+package com.gestock.dao;
+
+import com.gestock.models.Produit;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ProduitDAO {
+
+    private Connection connection;
+
+    public ProduitDAO(Connection connection) {
+        this.connection = connection;
+    }
+
+    // Ajouter un produit
+    public void ajouterProduit(Produit produit) throws SQLException {
+        String sql = "INSERT INTO produit (nom, quantite, prix) VALUES (?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, produit.getNom());
+            stmt.setInt(2, produit.getQuantite());
+            stmt.setDouble(3, produit.getPrix());
+            stmt.executeUpdate();
+        }
+    }
+
+    //  Modifier un produit
+    public void modifierProduit(Produit produit) throws SQLException {
+        String sql = "UPDATE produit SET nom = ?, quantite = ?, prix = ? WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, produit.getNom());
+            stmt.setInt(2, produit.getQuantite());
+            stmt.setDouble(3, produit.getPrix());
+            stmt.setInt(4, produit.getId());
+            stmt.executeUpdate();
+        }
+    }
+
+    // Supprimer un produit
+    public void supprimerProduit(int id) throws SQLException {
+        String sql = "DELETE FROM produit WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+        }
+    }
+
+    // Lister tous les produits
+    public List<Produit> getTousLesProduits() throws SQLException {
+        List<Produit> produits = new ArrayList<>();
+        String sql = "SELECT * FROM produit";
+
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Produit produit = new Produit(
+                        rs.getInt("id"),
+                        rs.getString("nom"),
+                        rs.getInt("quantite"),
+                        rs.getDouble("prix")
+                );
+                produits.add(produit);
+            }
+        }
+
+        return produits;
+    }
+}
