@@ -1,0 +1,57 @@
+Fonctionnalité : Conception de l’interface utilisateur
+Nom de l’étudiant : Youcef Saadi
+
+Objectif
+L’objectif de cette étape est de créer une interface graphique claire, moderne et intuitive pour permettre à l’utilisateur de :
+•	naviguer entre la gestion des produits et la gestion des mouvements de stock,
+•	effectuer des opérations de gestion simplement (ajout, modification, suppression, validation),
+•	générer un rapport PDF depuis l’interface.
+Cette interface améliore considérablement l’expérience utilisateur tout en rendant l’application accessible à un large public.
+________________________________________
+Technologies utilisées
+•	JavaFX : bibliothèque pour construire l’interface graphique.
+•	CSS personnalisé (styles.css) : pour styliser les composants (boutons, champs, tableaux).
+________________________________________
+Architecture de l’interface
+L’interface principale est construite dans la classe MainAppWithTabs :
+•	Écran d’introduction avec :
+o	un titre stylisé,
+o	une image (logo de l’application),
+o	un bouton “Entrer dans l’application”,
+o	le nom des auteurs.
+•	Interface principale avec un TabPane :
+o	Onglet 1 : Produits
+	Formulaire pour ajouter/modifier/supprimer un produit.
+	TableView pour afficher les produits.
+o	Onglet 2 : Mouvements de stock
+	Formulaire pour enregistrer une entrée ou une sortie.
+	TableView pour afficher le stock actuel.
+	Bouton pour générer un rapport PDF.
+________________________________________
+Stylisation avec CSS (styles.css)
+Le fichier styles.css améliore la lisibilité et la présentation visuelle :
+Élément	Style appliqué
+.root	Fond gris clair, police Segoe UI
+.label	Texte foncé, gras
+.button	Bouton vert avec arrondi et hover
+.text-field	Champs avec coins arrondis
+.table-view	Tableau encadré, fond blanc
+Cela rend l’application plus professionnelle, fluide et agréable à utiliser.
+________________________________________
+Processus de développement
+1.	Création de la classe MainAppWithTabs héritant de Application.
+2.	Construction dynamique de l’interface dans le code (pas de FXML).
+3.	Mise en place d’un écran d’accueil animé.
+4.	Intégration des deux modules dans des onglets.
+5.	Ajout des styles CSS.
+6.	Tests avec différentes tailles de fenêtre et données.
+________________________________________
+Fonctionnalités utilisateur via l’interface
+Action utilisateur	Résultat dans l'application
+Saisir un produit puis cliquer sur “Ajouter”	Le produit est enregistré et affiché dans la liste
+Sélectionner un produit + “Modifier” ou “Supprimer”	Met à jour ou supprime le produit
+Saisir un mouvement (entrée/sortie) + Valider	Stock mis à jour instantanément
+Cliquer sur “PDF”	Génère un rapport en PDF
+________________________________________
+Conclusion
+La conception de l’interface utilisateur a permis de créer une expérience visuelle fluide et fonctionnelle. Elle met en valeur l'ensemble des fonctionnalités développées tout en facilitant leur utilisation. Grâce à JavaFX et au style CSS personnalisé, l’application est agréable à utiliser, bien structurée et prête à être livrée à un utilisateur final non technique.
