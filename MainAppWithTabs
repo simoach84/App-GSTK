@@ -1,6 +1,5 @@
 package com.gestock.views;
 
-// Importations nécessaires pour l'application JavaFX et la gestion JDBC
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.DriverManager;
