@@ -1,0 +1,305 @@
+package com.gestock.views;
+
+// Importations nécessaires pour l'application JavaFX et la gestion JDBC
+import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.io.File;
+import java.util.List;
+
+import com.gestock.controllers.ProduitController;
+import com.gestock.controllers.StockController;
+import com.gestock.models.Produit;
+import com.gestock.models.ProduitStock;
+import com.gestock.utils.PdfGenerator;
+
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+
+// Classe principale de l'application JavaFX
+public class MainAppWithTabs extends Application {
+
+    // Déclaration des contrôleurs et des tables
+    private ProduitController produitController;
+    private StockController stockController;
+    private TableView<Produit> tableProduits;
+    private TableView<ProduitStock> tableStocks;
+
+    // Méthode principale au lancement de l'application
+    @Override
+    public void start(Stage primaryStage) {
+        // Éléments de l'écran d'accueil
+        Label titre = new Label("Application de Gestion de Stock");
+        titre.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+
+        // Image d'accueil
+        ImageView image = new ImageView(getClass().getResource("/images/image1.png").toExternalForm());
+        image.setFitWidth(200);
+        image.setPreserveRatio(true);
+
+        Label bas = new Label("Projet Réalisé par : Mohammed Achoch et Youcef Saadi");
+        bas.setStyle("-fx-font-size: 14px; -fx-text-fill: gray;");
+
+        // Bouton pour accéder à l'application
+        Button entrerBtn = new Button("Entrer dans l'application");
+        entrerBtn.setStyle("-fx-background-color: #2e8b57; -fx-text-fill: white;");
+        entrerBtn.setPadding(new Insets(8, 16, 8, 16));
+
+        // Mise en page verticale de l'accueil
+        VBox accueilLayout = new VBox(20, titre, image, entrerBtn, bas);
+        accueilLayout.setPadding(new Insets(30));
+        accueilLayout.setStyle("-fx-background-color: #f7f9fc;");
+        accueilLayout.setPrefSize(600, 400);
+        accueilLayout.setSpacing(20);
+        accueilLayout.setAlignment(javafx.geometry.Pos.CENTER);
+
+        Scene sceneAccueil = new Scene(accueilLayout);
+        primaryStage.setScene(sceneAccueil);
+        primaryStage.setTitle("Bienvenue");
+        primaryStage.show();
+
+        // Action bouton "Entrer"
+        entrerBtn.setOnAction(e -> {
+            try {
+                afficherInterfacePrincipale(primaryStage);
+            } catch (SQLException ex) {
+                showAlert(Alert.AlertType.ERROR, "❌ Connexion échouée à la base de données.");
+            }
+        });
+    }
+
+    // Méthode pour afficher les onglets principaux
+    private void afficherInterfacePrincipale(Stage stage) throws SQLException {
+        // Connexion à MySQL
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/stockdb", "root", "biskra007.");
+
+        // Initialisation des contrôleurs
+        produitController = new ProduitController(connection);
+        stockController = new StockController(connection);
+
+        // Création du conteneur à onglets
+        TabPane tabPane = new TabPane();
+
+        // Onglet des produits
+        Tab tabProduits = new Tab("Produits", creerOngletProduits());
+
+        // Onglet des mouvements de stock
+        Tab tabMouvements = new Tab("Mouvements de Stock", creerOngletMouvements());
+
+        tabProduits.setClosable(false);
+        tabMouvements.setClosable(false);
+
+        tabPane.getTabs().addAll(tabProduits, tabMouvements);
+
+        // Nouvelle scène principale
+        Scene mainScene = new Scene(tabPane, 800, 600);
+        mainScene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+        stage.setScene(mainScene);
+        stage.setTitle("Application de Gestion de Stock");
+    }
+
+    // Onglet Produits : formulaire + tableau
+    private VBox creerOngletProduits() {
+        // Champs de saisie
+        TextField tfNom = new TextField(); tfNom.setPromptText("Nom");
+        TextField tfQuantite = new TextField(); tfQuantite.setPromptText("Quantité");
+        TextField tfPrix = new TextField(); tfPrix.setPromptText("Prix");
+
+        // Boutons
+        Button btnAjouter = new Button("Ajouter");
+        Button btnModifier = new Button("Modifier");
+        Button btnSupprimer = new Button("Supprimer");
+
+        HBox form = new HBox(10, tfNom, tfQuantite, tfPrix, btnAjouter, btnModifier, btnSupprimer);
+        form.setPadding(new Insets(10));
+
+        // Création du tableau des produits
+        tableProduits = new TableView<>();
+        tableProduits.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        // Colonnes
+        TableColumn<Produit, Integer> colId = new TableColumn<>("ID");
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+
+        TableColumn<Produit, String> colNom = new TableColumn<>("Nom");
+        colNom.setCellValueFactory(new PropertyValueFactory<>("nom"));
+
+        TableColumn<Produit, Integer> colQte = new TableColumn<>("Quantité");
+        colQte.setCellValueFactory(new PropertyValueFactory<>("quantite"));
+
+        TableColumn<Produit, Double> colPrix = new TableColumn<>("Prix");
+        colPrix.setCellValueFactory(new PropertyValueFactory<>("prix"));
+
+        tableProduits.getColumns().addAll(colId, colNom, colQte, colPrix);
+        tableProduits.setPrefHeight(450);
+
+        VBox layout = new VBox(10, form, tableProduits);
+        layout.setPadding(new Insets(15));
+
+        chargerProduits(); // Remplir le tableau avec les données
+
+        // Action Ajouter
+        btnAjouter.setOnAction(e -> {
+            try {
+                produitController.ajouterProduit(tfNom.getText(), Integer.parseInt(tfQuantite.getText()), Double.parseDouble(tfPrix.getText()));
+                chargerProduits();
+                tfNom.clear(); tfQuantite.clear(); tfPrix.clear();
+            } catch (Exception ex) {
+                showAlert(Alert.AlertType.ERROR, "⚠️ Vérifiez les champs saisis.");
+            }
+        });
+
+        // Action Modifier
+        btnModifier.setOnAction(e -> {
+            Produit selected = tableProduits.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                try {
+                    produitController.modifierProduit(selected.getId(), tfNom.getText(), Integer.parseInt(tfQuantite.getText()), Double.parseDouble(tfPrix.getText()));
+                    chargerProduits();
+                } catch (Exception ex) {
+                    showAlert(Alert.AlertType.ERROR, "⚠️ Erreur lors de la modification.");
+                }
+            }
+        });
+
+        // Action Supprimer
+        btnSupprimer.setOnAction(e -> {
+            Produit selected = tableProduits.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                try {
+                    produitController.supprimerProduit(selected.getId());
+                    chargerProduits();
+                } catch (Exception ex) {
+                    showAlert(Alert.AlertType.ERROR, "⚠️ Erreur lors de la suppression.");
+                }
+            }
+        });
+
+        // Remplir le formulaire avec l'élément sélectionné
+        tableProduits.setOnMouseClicked(e -> {
+            Produit p = tableProduits.getSelectionModel().getSelectedItem();
+            if (p != null) {
+                tfNom.setText(p.getNom());
+                tfQuantite.setText(String.valueOf(p.getQuantite()));
+                tfPrix.setText(String.valueOf(p.getPrix()));
+            }
+        });
+
+        return layout;
+    }
+
+    // Onglet Mouvements de stock : entrées/sorties + PDF
+    private VBox creerOngletMouvements() {
+        TextField tfProduitId = new TextField(); tfProduitId.setPromptText("ID produit");
+
+        ComboBox<String> cbType = new ComboBox<>();
+        cbType.getItems().addAll("ENTREE", "SORTIE");
+        cbType.setPromptText("Type");
+
+        TextField tfQuantite = new TextField(); tfQuantite.setPromptText("Quantité");
+
+        Button btnValider = new Button("Valider");
+        Button btnPdf = new Button("PDF");
+
+        HBox form = new HBox(10, tfProduitId, cbType, tfQuantite, btnValider, btnPdf);
+        form.setPadding(new Insets(10));
+
+        // Tableau pour stock actuel
+        tableStocks = new TableView<>();
+        tableStocks.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn<ProduitStock, Integer> colId = new TableColumn<>("Produit ID");
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+
+        TableColumn<ProduitStock, Integer> colStock = new TableColumn<>("Quantité");
+        colStock.setCellValueFactory(new PropertyValueFactory<>("quantite"));
+
+        tableStocks.getColumns().addAll(colId, colStock);
+
+        VBox layout = new VBox(10, form, tableStocks);
+        layout.setPadding(new Insets(15));
+
+        chargerEtatStock();
+
+        // Valider un mouvement
+        btnValider.setOnAction(e -> {
+            try {
+                boolean ok = stockController.ajouterMouvement(
+                        Integer.parseInt(tfProduitId.getText()),
+                        cbType.getValue(),
+                        Integer.parseInt(tfQuantite.getText())
+                );
+                if (ok) {
+                    showAlert(Alert.AlertType.INFORMATION, "✅ Mouvement enregistré !");
+                    chargerEtatStock();
+                    tfProduitId.clear(); tfQuantite.clear(); cbType.setValue(null);
+                } else {
+                    showAlert(Alert.AlertType.WARNING, "❌ Mouvement refusé.");
+                }
+            } catch (Exception ex) {
+                showAlert(Alert.AlertType.ERROR, "⚠️ Erreur dans les champs.");
+            }
+        });
+
+        // Génération de rapport PDF
+        btnPdf.setOnAction(e -> {
+            try {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Enregistrer rapport");
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
+                fileChooser.setInitialFileName("rapport_stock.pdf");
+
+                File file = fileChooser.showSaveDialog(null);
+                if (file != null) {
+                    PdfGenerator.genererRapportStock(stockController.listerStockActuel(), file.getAbsolutePath());
+                    showAlert(Alert.AlertType.INFORMATION, "📄 Rapport généré !");
+                }
+            } catch (Exception ex) {
+                showAlert(Alert.AlertType.ERROR, "❌ Erreur PDF.");
+            }
+        });
+
+        return layout;
+    }
+
+    // Charger les produits dans le tableau
+    private void chargerProduits() {
+        try {
+            List<Produit> produits = produitController.listerProduits();
+            tableProduits.setItems(FXCollections.observableArrayList(produits));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Charger l'état du stock
+    private void chargerEtatStock() {
+        try {
+            List<ProduitStock> stock = stockController.listerStockActuel();
+            tableStocks.setItems(FXCollections.observableArrayList(stock));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Affichage d’une alerte
+    private void showAlert(Alert.AlertType type, String msg) {
+        Alert alert = new Alert(type, msg);
+        alert.setHeaderText(null);
+        alert.showAndWait();
+    }
+
+    // Point d’entrée du programme
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
