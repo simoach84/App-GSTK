@@ -6,65 +6,69 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+// Classe DAO pour gérer les interactions entre les objets Produit et la base de données
 public class ProduitDAO {
 
-    private Connection connection;
+    private Connection connection; // Connexion à la base de données
 
+    // Constructeur qui reçoit une connexion
     public ProduitDAO(Connection connection) {
         this.connection = connection;
     }
 
-    // Ajouter un produit
+    // Méthode pour ajouter un produit à la base de données
     public void ajouterProduit(Produit produit) throws SQLException {
         String sql = "INSERT INTO produit (nom, quantite, prix) VALUES (?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, produit.getNom());
-            stmt.setInt(2, produit.getQuantite());
-            stmt.setDouble(3, produit.getPrix());
-            stmt.executeUpdate();
+            stmt.setString(1, produit.getNom());       // Remplacer ? par le nom
+            stmt.setInt(2, produit.getQuantite());     // Remplacer ? par la quantité
+            stmt.setDouble(3, produit.getPrix());      // Remplacer ? par le prix
+            stmt.executeUpdate();                      // Exécuter l'insertion
         }
     }
 
-    //  Modifier un produit
+    // Méthode pour modifier un produit existant
     public void modifierProduit(Produit produit) throws SQLException {
         String sql = "UPDATE produit SET nom = ?, quantite = ?, prix = ? WHERE id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, produit.getNom());
-            stmt.setInt(2, produit.getQuantite());
-            stmt.setDouble(3, produit.getPrix());
-            stmt.setInt(4, produit.getId());
-            stmt.executeUpdate();
+            stmt.setString(1, produit.getNom());       // Nouveau nom
+            stmt.setInt(2, produit.getQuantite());     // Nouvelle quantité
+            stmt.setDouble(3, produit.getPrix());      // Nouveau prix
+            stmt.setInt(4, produit.getId());           // ID du produit à modifier
+            stmt.executeUpdate();                      // Exécuter la mise à jour
         }
     }
 
-    // Supprimer un produit
+    // Méthode pour supprimer un produit par son ID
     public void supprimerProduit(int id) throws SQLException {
         String sql = "DELETE FROM produit WHERE id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
+            stmt.setInt(1, id);                        // ID du produit à supprimer
+            stmt.executeUpdate();                      // Exécuter la suppression
         }
     }
 
-    // Lister tous les produits
+    // Méthode pour récupérer tous les produits depuis la base de données
     public List<Produit> getTousLesProduits() throws SQLException {
-        List<Produit> produits = new ArrayList<>();
-        String sql = "SELECT * FROM produit";
+        List<Produit> produits = new ArrayList<>();    // Liste pour stocker les produits
+        String sql = "SELECT * FROM produit";          // Requête SQL
 
         try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             ResultSet rs = stmt.executeQuery(sql)) { 
 
+            // Parcourir les résultats ligne par ligne
             while (rs.next()) {
                 Produit produit = new Produit(
-                        rs.getInt("id"),
-                        rs.getString("nom"),
-                        rs.getInt("quantite"),
-                        rs.getDouble("prix")
+                        rs.getInt("id"),               // Lire l'id
+                        rs.getString("nom"),           // Lire le nom
+                        rs.getInt("quantite"),         // Lire la quantité
+                        rs.getDouble("prix")           // Lire le prix
                 );
-                produits.add(produit);
+                produits.add(produit);                 
             }
         }
 
-        return produits;
+        return produits;                             
     }
 }
+
