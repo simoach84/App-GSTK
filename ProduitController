@@ -1,39 +1,41 @@
 package com.gestock.controllers;
 
+// Importation des classes 
 import com.gestock.dao.ProduitDAO;
 import com.gestock.models.Produit;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+// Contrôleur pour gérer les opérations sur les produits
 public class ProduitController {
 
-    private ProduitDAO produitDAO;
+    private ProduitDAO produitDAO; 
 
+    // Constructeur du contrôleur qui reçoit une connexion à la base de données
     public ProduitController(Connection connection) {
         this.produitDAO = new ProduitDAO(connection);
     }
 
-    //Ajouter un produit
+    // Ajouter un nouveau produit (sans ID)
     public void ajouterProduit(String nom, int quantite, double prix) throws SQLException {
-        Produit produit = new Produit(nom, quantite, prix);
-        produitDAO.ajouterProduit(produit);
+        Produit produit = new Produit(nom, quantite, prix);  
+        produitDAO.ajouterProduit(produit);  /
     }
 
-    // Modifier un produit
+    // Modifier un produit existant (avec ID)
     public void modifierProduit(int id, String nom, int quantite, double prix) throws SQLException {
-        Produit produit = new Produit(id, nom, quantite, prix);
-        produitDAO.modifierProduit(produit);
+        Produit produit = new Produit(id, nom, quantite, prix); 
+        produitDAO.modifierProduit(produit); 
     }
 
-    //Supprimer un produit
+    // Supprimer un produit à partir de son ID
     public void supprimerProduit(int id) throws SQLException {
-        produitDAO.supprimerProduit(id);
+        produitDAO.supprimerProduit(id);  
     }
 
-    //Lister tous les produits
+    // Retourner la liste de tous les produits
     public List<Produit> listerProduits() throws SQLException {
-        return produitDAO.getTousLesProduits();
+        return produitDAO.getTousLesProduits();  
     }
 }
